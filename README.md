@@ -20,7 +20,7 @@ Done: Minimum Spanning Tree
 ## Algorithms:
 
 1. Hallway generator to connect a room to another room. It will build only in the x/-x and y/-y directions to simplify the process for now.
-2. Room Generator - variables for minimum room size, maximum room size. Produces a single floor tile block surrounded by wall tiles
+2. Room Generator - input a point and build a randomly sized room around it using a floor tile and wall tiles. Handle collisions with other rooms using tile.collides()
 Done: Prim's
 Done: Point placer and graph generator
 
