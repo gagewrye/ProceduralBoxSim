@@ -13,10 +13,14 @@ class MST():
     # Adds additional connections between rooms to create loops and complexity
     def add_cycles(self, num_cycles: int) -> None:
         possible_connections = []
+        vertices = list(self.vertices)
+        n = len(vertices)
 
-        for vertex1 in self.vertices:
-            for vertex2 in self.vertices:
-                if vertex1 != vertex2 and not directly_connected(self.mst, vertex1, vertex2):
+        for i in range(n):
+            vertex1 = vertices[i]
+            for j in range(i+1,n):
+                vertex2 = vertices[j]
+                if not directly_connected(self.mst, vertex1, vertex2):
                     distance = manhattan_distance(vertex1, vertex2)
                     # Use a heap to maintain the smallest distances at the top
                     heapq.heappush(possible_connections, (distance, vertex1, vertex2))
@@ -24,7 +28,6 @@ class MST():
         for _ in range(num_cycles):
             if possible_connections:
                 distance, room1, room2 = heapq.heappop(possible_connections)
-                
                 self.mst[room1].append((room2, distance))
             else:
                 break  # No more connections to add - you have turned it back into a fully connected graph!

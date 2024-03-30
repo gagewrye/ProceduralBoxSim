@@ -11,21 +11,22 @@
 7. Convert this map to unreal engine environment
 
 ## Data Structures:
-1. MinHeap to store the edges for Prim's
-2. Something that simultaneously tracks the number of times every block has been traversed. Once all of the blocks traversed >= 1, then we will know that the environment has been fully explored. We could probably use an array that stores the references/pointers to every floor tile's traversion count and then return false if any are false.
+1. Something that simultaneously tracks the number of times every block has been traversed. Once all of the blocks traversed >= 1, then we will know that the environment has been fully explored. We could probably use an array that stores the references/pointers to every floor tile's traversion count and then return false if any are 0.
 Done: tiles
+Done: Minimum Spanning Tree
 
 
 
 ## Algorithms:
-1. Point placer - variable for how many points/rooms
-2. Prim's
-3. Hallway algorithm to connect a room to another room. It will build only in the x/-x and y/-y directions to simplify the process for now.
-4. Room Generator - variables for minimum room size, maximum room size. Produces a single floor tile block surrounded by wall tiles
+
+1. Hallway generator to connect a room to another room. It will build only in the x/-x and y/-y directions to simplify the process for now.
+2. Room Generator - variables for minimum room size, maximum room size. Produces a single floor tile block surrounded by wall tiles
+Done: Prim's
+Done: Point placer and graph generator
 
 ## Main generation function:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
-Output: Map size, tile objects
+Output: Map size, tile objects, traversal tracker
 
 
 
