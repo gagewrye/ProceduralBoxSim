@@ -11,16 +11,17 @@
 7. Convert this map to unreal engine environment
 
 ## Data Structures:
-1. Something that simultaneously tracks the number of times every block has been traversed. Once all of the blocks traversed >= 1, then we will know that the environment has been fully explored. We could probably use an array that stores the references/pointers to every floor tile's traversion count and then return false if any are 0.
+1. Something that simultaneously tracks the number of times every block has been traversed. Once all of the blocks traversed >= 1, then we will know that the environment has been fully explored. We could probably use an array that stores the references/pointers to every Target's traversion count and then return false if any are 0.
 Done: tiles
 Done: Minimum Spanning Tree
+Done: Rooms and Hallways
 
 
 
 ## Algorithms:
 
-1. Hallway generator to connect a room to another room. It will build only in the x/-x and y/-y directions to simplify the process for now.
-2. Room Generator - input a point and build a randomly sized room around it using a floor tile and wall tiles. Handle collisions with other rooms using tile.collides()
+1. Hallway generator to connect a room to another room. It builds only in the x/-x and y/-y directions to simplify the process. build_walls, a function to build walls around a hallway, needs to be finished.
+Done: Room generator, input a point and build a randomly sized room around it using a floor tile and wall tiles.
 Done: Prim's
 Done: Point placer and graph generator
 
