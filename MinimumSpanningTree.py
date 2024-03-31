@@ -2,23 +2,39 @@ import random
 import heapq
 
 class MST():
-    def __init__(self, num_points: int, map_size_x: int, map_size_y: int, max_room_size: int, rand: random) -> None:
+    """
+    This class creates a minimum spanning tree using a dictionary with (X,Y) vertices as
+    the keys and a value of a list of vertices that the key is connected to.
+    """
+    def __init__(self, num_points: int, map_size_x: int, map_size_y: int, max_room_size: int, seed: int, rand: random) -> None:
+        self.seed = seed
         self.map_size = (map_size_x, map_size_y)
-        self.num_points = num_points
         self.max_room_size = max_room_size
-        self.vertices = create_points(num_points, map_size_x, map_size_y, rand, max_room_size)
-        self.graph = generate_graph(self.vertices)
-        self.mst = prims_algorithm(self.graph, next(iter(self.graph)))
+        self.vertices = _create_points(num_points, map_size_x, map_size_y, rand, max_room_size)
+        graph = _generate_graph(self.vertices)
+        self.mst = _prims_algorithm(graph, next(iter(graph)))
+    
+    def get_mst(self) -> dict:
+        return self.mst
+    def get_vertices(self) -> list[tuple]:
+        return self.vertices
+    def get_map_size(self) -> tuple:
+        return self.map_size
+    def get_seed(self) -> int:
+        return self.seed
+    def get_num_rooms(self) -> int:
+        return len(self.vertices)
+    def get_max_room_size(self) -> int:
+        return self.max_room_size
     
     # Adds additional connections between rooms to create loops and complexity
     def add_cycles(self, num_cycles: int) -> None:
         possible_connections = []
-        vertices = list(self.vertices)
-        n = len(vertices)
+        vertices = self.vertices
 
-        for i in range(n):
+        for i in range(len(vertices)):
             vertex1 = vertices[i]
-            for j in range(i+1,n):
+            for j in range(i+1,len(vertices)):
                 vertex2 = vertices[j]
                 if not directly_connected(self.mst, vertex1, vertex2):
                     distance = manhattan_distance(vertex1, vertex2)
@@ -33,7 +49,7 @@ class MST():
                 break  # No more connections to add - you have turned it back into a fully connected graph!
 
 
-def create_points(num_points: int, x: int, y: int, rand: random, max_room_size: int) -> list:
+def _create_points(num_points: int, x: int, y: int, rand: random, max_room_size: int) -> list:
     points = []
     buffer = max_room_size
     for _ in range(num_points):
@@ -44,7 +60,7 @@ def manhattan_distance(point1, point2):
     return abs(point1[0] - point2[0]) + abs(point1[1] - point2[1])
 
 # Generate a fully connected graph from a list of points
-def generate_graph(points):
+def _generate_graph(points: list) -> dict:
     graph = {}
     for point1 in points:
         for point2 in points:
@@ -54,7 +70,7 @@ def generate_graph(points):
     return graph
 
 # Prim's Algorithm to find the MST - chatGPT
-def prims_algorithm(graph, starting_vertex):
+def _prims_algorithm(graph: dict, starting_vertex: tuple) -> dict:
     mst = {}
     visited = set([starting_vertex])
     edges = [(cost, starting_vertex, to) for to, cost in graph[starting_vertex]]
@@ -72,7 +88,7 @@ def prims_algorithm(graph, starting_vertex):
     
     return mst
 
-def directly_connected(mst, room1, room2):
+def directly_connected(mst: MST, room1: tuple, room2: tuple) -> bool:
     for dest, _ in mst.get(room1):
         if dest == room2:
             return True
