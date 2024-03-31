@@ -1,8 +1,15 @@
 import Tile
 import random
 import partial
-
+"""
+Rooms and Hallways
+"""
 class Room():
+    """
+    A room of variable size surrounded by walls.
+
+    Contains a single floor tile and multiple surrounding walls
+    """
     def __init__(self, vertex: tuple, max_room_size: int, other_rooms: list['Room'], target_offset, rand: random):
         x, y = vertex
         
@@ -184,11 +191,10 @@ def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
     def _add_floor_and_targets(x, y, other_floors: list[Tile.FloorTile], hallway_floors, target_offset, rand, target=None):
         if not any(floor.X_boundary == x and floor.Y_boundary == y for floor in other_floors):
             new_floor = Tile.FloorTile(x, y, x+1, y+1, target_offset, rand)
-            if target:
-                # Link the floor tile with the room's target
+            if target: # Link the floor tile with the room's target
                 new_floor.add_adjacent_target(target)
-                # Assuming the room has a method to add targets as well, you might need to adjust this
                 target.add_adjacent_target(new_floor)
+            
             for floor in _check_surrounding_for_floors(x, y, other_floors):
                 new_floor.add_adjacent_target(floor)
                 floor.add_adjacent_target(new_floor)
