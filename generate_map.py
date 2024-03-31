@@ -1,6 +1,7 @@
 from argparse import ArgumentParser, Namespace
 import random
 import MinimumSpanningTree
+import construct
 
 def parse_args() -> Namespace:
     arg_parser = ArgumentParser("Train command classification networks.")
@@ -22,9 +23,8 @@ def __main__():
     rand = random.seed(args.room_seed)
     mst = MinimumSpanningTree.MST(args.num_rooms, args.map_size_x, args.map_size_y, args.max_room_size, rand)
     mst.add_cycles(args.num_cycles)
-    # Build Rooms
-    # Build Hallways
-    return map
+    map = construct.map(mst) # Build Rooms and Hallways
+    # Save map somewhere
 
 if __name__ == "__main__":
     main()
