@@ -36,7 +36,7 @@ class MST():
             vertex1 = vertices[i]
             for j in range(i+1,len(vertices)):
                 vertex2 = vertices[j]
-                if not directly_connected(self.mst, vertex1, vertex2):
+                if not directly_connected(self, vertex1, vertex2):
                     distance = manhattan_distance(vertex1, vertex2)
                     # Use a heap to maintain the smallest distances at the top
                     heapq.heappush(possible_connections, (distance, vertex1, vertex2))
@@ -63,36 +63,43 @@ def manhattan_distance(point1, point2):
 def _generate_graph(points: list) -> dict:
     graph = {}
     for point1 in points:
+        graph[point1] = []  # Initialize every point with an empty list
         for point2 in points:
             if point1 != point2:
                 distance = manhattan_distance(point1, point2)
                 graph[point1].append((point2, distance))
     return graph
 
+
 # Prim's Algorithm to find the MST - chatGPT
 def _prims_algorithm(graph: dict, starting_vertex: tuple) -> dict:
-    mst = {}
+    mst = {starting_vertex: []}  # Initialize the starting vertex with an empty list
     visited = set([starting_vertex])
     edges = [(cost, starting_vertex, to) for to, cost in graph[starting_vertex]]
     
+    heapq.heapify(edges)  # Heapify the edges for efficient minimum extraction
+    
     while edges:
-        cost, frm, to = sorted(edges)[0]
-        edges = [edge for edge in edges if edge[2] != to]
+        cost, frm, to = heapq.heappop(edges)  # Use heapq for efficient minimum edge extraction
         
         if to not in visited:
             visited.add(to)
+            if to not in mst:
+                mst[to] = []  # Ensure each new vertex is initialized in the MST
             mst[frm].append((to, cost))
+            
             for next_to, cost in graph[to]:
                 if next_to not in visited:
-                    edges.append((cost, to, next_to))
+                    heapq.heappush(edges, (cost, to, next_to))
     
     return mst
 
+
 def directly_connected(mst: MST, room1: tuple, room2: tuple) -> bool:
-    for dest, _ in mst.get(room1):
+    for dest, _ in mst.get_mst()[room1]:
         if dest == room2:
             return True
-    for dest, _ in mst.get(room2):
+    for dest, _ in mst.get_mst()[room2]:
         if dest == room1:
             return True
     return False

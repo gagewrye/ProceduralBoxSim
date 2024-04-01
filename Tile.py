@@ -47,6 +47,9 @@ class FloorTile(Tile):
     
     def get_target(self) -> 'Target':
         return self.target
+    def add_target(self, target):
+        curr_targ = self.get_target()
+        curr_targ.add_target(target)
 
 class Target():
     """

@@ -13,9 +13,9 @@ def parse_args() -> Namespace:
 
     arg_parser.add_argument("--num_rooms", type=int, default=4, help="Number of rooms on map")
     arg_parser.add_argument("--room_seed", type=int, default=47, help="Determines what the map looks like")
-    arg_parser.add_argument("--map_size_x", type=int, default=1920, help="X-axis size")
-    arg_parser.add_argument("--map_size_y", type=int, default=1080, help="Y-axis size")
-    arg_parser.add_argument("--max_room_size", type=int, default=40, help="How large the rooms can be")
+    arg_parser.add_argument("--map_size_x", type=int, default=100, help="X-axis size")
+    arg_parser.add_argument("--map_size_y", type=int, default=100, help="Y-axis size")
+    arg_parser.add_argument("--max_room_size", type=int, default=10, help="How large the rooms can be")
     arg_parser.add_argument("--target_offset", type=int, default=0, help="Offsets the targets from the center. Higher numbers can be further away. Keep below floor size / 2")
     arg_parser.add_argument("--num_cycles", type=int, default=2, help="Cycles will add complexity and loops to the map, creating more challenging exploration")
     
@@ -45,11 +45,13 @@ def main():
     os.makedirs(directory_name, exist_ok=True)
 
     # visualize and save image
+    
     map.draw_map(show=False)
     plt.savefig(os.path.join(directory_name, "map_visualization.png"))
     plt.close()  
     
     # Save map and target handler as pickle files
+    print("Saving to {directory_name}")
     with open(os.path.join(directory_name, "map_obj.pkl"), 'wb') as map_file:
         pickle.dump(map, map_file)
     with open(os.path.join(directory_name, "target_handler.pkl"), 'wb') as target_file:

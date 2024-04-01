@@ -1,5 +1,4 @@
 from Tile import FloorTile, WallTile, Target
-from functools import partial
 import random
 
 """
@@ -14,12 +13,11 @@ class Room():
     def __init__(self, vertex: tuple, max_room_size: int, other_rooms: list['Room'], target_offset):
         x, y = vertex
         
-        top_Y = y + random.randint(0, max_room_size)
-        right_X = x + random.randint(0,max_room_size)
-        left_X = x - random.randint(0,max_room_size)
-        bottom_Y = y - random.randint(0, max_room_size)
+        top_Y = y + random.randint(1, max_room_size)
+        right_X = x + random.randint(1,max_room_size)
+        left_X = x - random.randint(1,max_room_size)
+        bottom_Y = y - random.randint(1, max_room_size)
 
-        self.center = ((right_X - left_X) , (top_Y - bottom_Y))
         self.boundaries = (left_X, bottom_Y, right_X, top_Y)
         self.floor = _build_floor(self.boundaries, target_offset)
         self.walls = _build_walls(self.floor, other_rooms)
@@ -45,7 +43,7 @@ def _build_floor(boundaries: tuple, target_offset: float) -> FloorTile:
     left_x, bottom_y, right_x, top_y = boundaries
     return FloorTile(left_x, bottom_y, right_x, top_y, target_offset)
 
-def _build_walls(floor: FloorTile, other_rooms) -> list:
+def _build_walls(floor: FloorTile, other_rooms: list[Room]) -> list:
     walls = []
     left_x, bottom_y, right_x, top_y = floor.get_boundaries()
 
@@ -86,10 +84,10 @@ class Hallway:
    
     Walls should be built using build_walls after all hallways have been constructed.
     """
-    def __init__(self, start: tuple, end: tuple, rooms: list, other_floors: list):
+    def __init__(self, start: tuple, end: tuple, rooms: list, floor_locations: dict[tuple, FloorTile], target_offset):
         self.vertex1 = start
         self.vertex2 = end
-        self.floors = _build_hallway(start, end, rooms, other_floors)
+        self.floors = _build_hallway(start, end, rooms, floor_locations, target_offset)
         self.walls = list[WallTile]
         
     def get_hallway(self):
@@ -105,71 +103,76 @@ class Hallway:
         walls_to_add = []
         # TODO: Add wall building logic
 
-        self.walls += walls_to_add
+        return walls_to_add
     
 def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
-                   other_floors: list[FloorTile], target_offset) -> list[FloorTile]:
-    _add_floor = partial(_add_floor_and_targets, target_offset=target_offset)
+                   other_floors: dict[tuple, FloorTile], target_offset) -> list[FloorTile]:
     hallway_floors = []
-    start_x, start_y = start
-    end_x, end_y = end
-    x_step, y_step = 1
-    if end_x < start_x:
-        x_step = -1
-    if end_y < start_y:
-        y_step = -1
 
-    current_x, current_y = start_x, start_y
+    # Initialize location and hallway direction
+    current_x, current_y = start
+    end_x, end_y = end
+    
+    # Adjust step based on direction
+    x_step = 1 if end[0] >= start[0] else -1
+    y_step = 1 if end[1] >= start[1] else -1
+
+    
     start_room = is_in_any_room(current_x, current_y, rooms)
     start_target = start_room.get_target()
 
     # navigate to the end of the room
-    while current_x != end_x:
+    while current_x <= end_x:
         current_x += x_step
-        if not room.contains(current_x, current_y):
+        if not start_room.contains(current_x + x_step, current_y):
             break
             # You have exited the room
-    if room.contains(current_x, current_y): # still in room
+    if start_room.contains(current_x, current_y): # still in room
         while current_y != end_y:
             current_y += y_step
-            if not room.contains(current_x, current_y):
+            if not start_room.contains(current_x, current_y):
                 break
-                
-    # Horizontal placement
-    while current_x != end_x:
+    # add the floor tile and link to the room
+    _add_floor_and_targets(current_x, current_y, other_floors,
+                            hallway_floors, target_offset, start_target)
+    
+    while current_x <= end_x:
         # Check room entry
         room = is_in_any_room(current_x, current_y, rooms)
         if room: # Entering room
             # link room to entering hallway
             room.add_target(hallway_floors[-1].get_target())
-            hallway_floors[-1].add_adjacent_target(room.get_target())
+            hallway_floors[-1].add_target(room.get_target())
+            room.add_target(hallway_floors[-1].get_target())
             # traverse through room
             start_target = room.get_target()
             while current_x != end_x:
                 current_x += x_step
                 if not room.contains(current_x, current_y): # Exiting room
                     break
-        _add_floor(current_x, current_y, other_floors, hallway_floors, start_target)
-        start_target = None  # Only link the first tile after exiting a room
+        # In case you end in a room
+        if current_x == end_x: 
+            break
+        _add_floor_and_targets(current_x, current_y, other_floors,
+                                hallway_floors, target_offset, start_target)
         current_x += x_step
 
-    # Reset for vertical placement
-    start_target = room.get_target() if is_in_any_room(current_x, current_y, rooms) else None
-
-    while current_y != end_y:
+    while current_y <= end_y:
         room = is_in_any_room(current_x, current_y, rooms)
         if room:
             # link room to entering hallway
             room.add_target(hallway_floors[-1].get_target())
-            hallway_floors[-1].add_adjacent_target(room.get_target())
+            hallway_floors[-1].add_target(room.get_target())
             # Traverse through room
             start_target = room.get_target()
             while current_y != end_y:
                 current_y += y_step
                 if not room.contains(current_x, current_y): # Exiting room
                     break
-        _add_floor(current_x, current_y, other_floors, hallway_floors, start_target)
-        start_target = None  # Reset after linking
+        if current_y == end_y:
+            break
+        _add_floor_and_targets(current_x, current_y, other_floors,
+                                hallway_floors, target_offset, start_target)
         current_y += y_step
 
     end_room = is_in_any_room(end_x, end_y, rooms)
@@ -177,28 +180,35 @@ def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
         end_target = end_room.get_target()
         if hallway_floors:
             last_floor = hallway_floors[-1]
-            last_floor.add_adjacent_target(end_target)
-            end_room.add_adjacent_target(last_floor)
-    
-    def is_in_any_room(x, y, rooms) -> Room:
-        for room in rooms:
-            if room.contains(x, y):
-                return room
-        return None
-
-    def _add_floor_and_targets(x, y, other_floors: list[FloorTile], hallway_floors, target_offset, target=None):
-        if not any(floor.X_boundary == x and floor.Y_boundary == y for floor in other_floors):
-            new_floor = FloorTile(x, y, x+1, y+1, target_offset)
-            if target: # Link the floor tile with the room's target
-                new_floor.add_adjacent_target(target)
-                target.add_adjacent_target(new_floor)
-            
-            for floor in _check_surrounding_for_floors(x, y, other_floors):
-                new_floor.add_adjacent_target(floor)
-                floor.add_adjacent_target(new_floor)
-            hallway_floors.append(new_floor)
+            last_floor.add_target(end_target)
+            end_room.add_target(last_floor)
 
     return hallway_floors
+
+def is_in_any_room(x, y, rooms) -> Room:
+    for room in rooms:
+        if room.contains(x, y):
+            return room
+    return None
+
+def _add_floor_and_targets(x, y, other_floors: dict[tuple, FloorTile], hallway_floors: list[FloorTile],
+                            target_offset, target:Target=None):
+    proposed_location = other_floors.get((x,y))
+    if proposed_location is None: # empty/no floor
+        # build floor
+        new_floor = FloorTile(x, y, x+1, y+1, target_offset)
+        # link floor
+        new_floor.add_target(target)
+        target.add_target(new_floor)
+        target = new_floor.get_target()
+        # Add Floor
+        other_floors[(x,y)] = new_floor
+        hallway_floors.append(new_floor)
+    else: # Already a floor here
+        # link floor
+        proposed_location.add_target(target)
+        target.add_target(proposed_location)
+        target = proposed_location.get_target()
 
 def _check_surrounding_for_floors(x, y, all_tiles):
     surrounding_floors = []

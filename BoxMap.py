@@ -10,15 +10,15 @@ class BoxMap():
     """
     Creates a map of rooms and hallways using a graph.
     The building is represented using floor tiles and wall tiles.
+    
+    The self.floors variable is a dictionary with coordinates mapped to floor tiles.
     Targets can be extracted from the floor tiles. (See FloorTile class in Tile.py)
     """
     def __init__(self, mst: MST, target_offset=0) -> None:
         self.map = mst
         self.floors, self.walls = _build(mst, target_offset)
-        self.targets = {}
-    
-    def get_tiles(self) -> list:
-        return self.floors + self.walls
+        
+        
     def get_floors(self) -> list[FloorTile]:
         return self.floors
     def get_walls(self) -> list[WallTile]:
@@ -41,23 +41,34 @@ class BoxMap():
                     "target": 'red',
                     "traversed_target": 'green'}
 
-        for tile in self.get_tiles():
+        for tile in self.get_floors():
             left_x , bottom_y, right_x, top_y = tile.get_boundaries()
-            tile_type = tile.get_type()
 
             width = right_x - left_x
             height = top_y - bottom_y
 
-            # Create a rectangle patch for each tile
+            # Add tile
             center = (right_x - (width/2), top_y - (height/2))
-            rect = patches.Rectangle(center, width, height, linewidth=1, edgecolor='black', facecolor=color_map.get(tile_type, "grey"))
+            rect = patches.Rectangle(center, width, height, linewidth=0.2, edgecolor='black', facecolor=color_map.get("floor"))
+            ax.add_patch(rect)
             
-            if tile_type == "floor": # add target
-                target_X, target_Y = tile.get_target()
-                target_color = "target" if tile.get_times_traversed() == 0 else 'traversed_target'
-                target = patches.Circle((target_X,target_Y), 0.1, color=color_map.get(target_color))
-                ax.add_patch(target)
+            # Add target
+            target = tile.get_target()
+            target_X, target_Y = target.get_coordinates()
+            target_color = "target" if target.get_times_traversed() == 0 else 'traversed_target'
+            target = patches.Circle((target_X,target_Y), 0.1, color=color_map.get(target_color))
+            ax.add_patch(target)
+
+        for tile in self.get_walls():
             
+            left_x , bottom_y, right_x, top_y = tile.get_boundaries()
+
+            width = right_x - left_x
+            height = top_y - bottom_y
+
+            # Add tile
+            center = (right_x - (width/2), top_y - (height/2))
+            rect = patches.Rectangle(center, width, height, linewidth=0.2, edgecolor='black', facecolor=color_map.get("wall"))
             ax.add_patch(rect)
 
         if show:
@@ -66,6 +77,7 @@ class BoxMap():
 def _hallway_blueprint(mst: MST) -> list:
     # save the hallway as a list of point pairs
     hallways = []
+    # Get Room Centers
     vertices = mst.get_vertices()
     n = len(vertices)
 
@@ -74,44 +86,47 @@ def _hallway_blueprint(mst: MST) -> list:
         for j in range(i+1,n):
             vertex2 = vertices[j]
             if MinimumSpanningTree.directly_connected(mst, vertex1, vertex2):
-                room1 = vertex1[0]
-                room2 = vertex2[0]
+                room1 = vertex1
+                room2 = vertex2
                 # build hallway between those points
                 hallways.append((room1, room2))
     return hallways
 
-def _construct_rooms(rooms: list, max_size: int, target_offset) -> list[Room]:
+def _construct_rooms(planned_rooms: list, max_size: int, target_offset) -> list[Room]:
     # list of rooms, passed into Room class to avoid collisions and overwriting
-    rooms = list[Room]
-    for room in rooms:
+    rooms = []
+    for room in planned_rooms:
         addition = Room(room, max_size, rooms, target_offset)
         rooms.append(addition)
     return rooms
 
 def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> list[Hallway]:
-    other_floors = list[FloorTile]
-    walls = list[WallTile]
-    hallways = list[Hallway]
+    walls = []
+    hallways = []
+    floors = []
+    floor_locations: dict[tuple, FloorTile] = {}
     # Build Hallway floors
+    print("Assembling Hallway floors")
     for start, end in planned_hallways:
-        hallway = Hallway(start, end, rooms, other_floors, target_offset)
-        other_floors += hallway.get_floors()
+        hallway = Hallway(start, end, rooms, floor_locations, target_offset)
         hallways.append(hallway)
+    
     # Build hallway walls
     for hallway in hallways:
         hallway.build_walls(hallways, rooms) # TODO: finish function
         walls.append(hallway.get_walls())
-    return other_floors, walls
+        floors = hallway.get_floors()
+    return floors, walls
 
 def _build(mst: MST, target_offset) -> tuple:
     """
     Returns: a list of rooms and hallways
     """
-    floors = list[FloorTile]
-    walls = list[WallTile]
+    floors = []
+    walls = []
     
     # Create blueprint
-    planned_rooms = mst.get_vertices
+    planned_rooms = mst.get_vertices()
     planned_hallways = _hallway_blueprint(mst)
 
     # place rooms
@@ -124,6 +139,6 @@ def _build(mst: MST, target_offset) -> tuple:
         floors.append(room.get_floor())
         walls += room.get_walls()
     floors += hallway_floors
-    walls += hallway_walls
+    # walls += hallway_walls TODO: add back when walls can be built
     
     return floors, walls
