@@ -37,7 +37,7 @@ class BoxMap():
         ax.set_ylim(0, y)
 
         color_map = {"floor" : 'grey',
-                    "wall" : 'blue',
+                    "wall" : 'green',
                     "target": 'red',
                     "traversed_target": 'green'}
 
@@ -100,22 +100,21 @@ def _construct_rooms(planned_rooms: list, max_size: int, target_offset) -> list[
         rooms.append(addition)
     return rooms
 
-def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> list[Hallway]:
+def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> tuple:
     walls = []
     hallways = []
     floors = []
     floor_locations: dict[tuple, FloorTile] = {}
     # Build Hallway floors
-    print("Assembling Hallway floors")
     for start, end in planned_hallways:
         hallway = Hallway(start, end, rooms, floor_locations, target_offset)
         hallways.append(hallway)
+        floors.extend(hallway.get_floors())
     
     # Build hallway walls
     for hallway in hallways:
         hallway.build_walls(hallways, rooms) # TODO: finish function
         walls.append(hallway.get_walls())
-        floors = hallway.get_floors()
     return floors, walls
 
 def _build(mst: MST, target_offset) -> tuple:
@@ -138,6 +137,7 @@ def _build(mst: MST, target_offset) -> tuple:
     for room in rooms:
         floors.append(room.get_floor())
         walls += room.get_walls()
+    print(hallway_floors)
     floors += hallway_floors
     # walls += hallway_walls TODO: add back when walls can be built
     
