@@ -37,7 +37,7 @@ class Room():
     
     def contains(self, x, y) -> bool:
         left_x, bottom_y, right_x, top_y = self.floor.get_boundaries()
-        return ((left_x - 1 <= x < right_x) and (bottom_y - 1 <= y < top_y))
+        return ((left_x <= x < right_x) and (bottom_y <= y < top_y))
     
 def _build_floor(boundaries: tuple, target_offset: float) -> FloorTile:
     left_x, bottom_y, right_x, top_y = boundaries
@@ -47,36 +47,42 @@ def _build_walls(floor: FloorTile, other_rooms: list[Room]) -> list:
     walls = []
     left_x, bottom_y, right_x, top_y = floor.get_boundaries()
 
-    # add a wall, segmenting in case of interruptions
     def _add_wall_segments(constant, range_start, range_end, vertical=False):
         start = None
         for pos in range(range_start, range_end + 1):
-            if vertical:
-                is_blocked = any(room.contains(constant, pos) for room in other_rooms)
+            is_blocked = any(room.contains(pos, constant) if vertical else room.contains(constant, pos) for room in other_rooms)
+
+            if not is_blocked:
+                if start is None:
+                    start = pos
+                # Add the segment if this is the last position in range and a start point was marked
+                if pos == range_end:
+                    if vertical:
+                        walls.append(WallTile(constant, start, constant, pos))
+                    else:
+                        walls.append(WallTile(start, constant, pos, constant))
             else:
-                is_blocked = any(room.contains(pos, constant) for room in other_rooms)
-            
-            if not is_blocked and start is None:
-                start = pos
-            elif is_blocked and start is not None:
-                if vertical:
-                    walls.append(WallTile(constant, start, constant, pos - 1))
-                else:
-                    walls.append(WallTile(start, constant, pos - 1, constant))
-                start = None
-            elif not is_blocked and pos == range_end:
-                if vertical:
-                    walls.append(WallTile(constant, start, constant, pos))
-                else:
-                    walls.append(WallTile(start, constant, pos, constant))
-        
-    # Add wall segments around the perimeter
-    _add_wall_segments(left_x - 1, bottom_y, top_y, vertical=True)  # Left
-    _add_wall_segments(top_y, left_x, right_x)  # Top
-    _add_wall_segments(right_x, top_y, bottom_y, vertical=True)  # Right
-    _add_wall_segments(bottom_y - 1, right_x, left_x)  # Bottom
+                if start is not None:
+                    if vertical:
+                        walls.append(WallTile(constant, start, constant, pos - 1))
+                    else:
+                        walls.append(WallTile(start, constant, pos - 1, constant))
+                    start = None  # Reset start for the next segment
+    
+    # I'm not sure why adding these fixes it, but it does
+    half_width = (right_x - left_x) / 2.0
+    half_length = (top_y - bottom_y) / 2.0
+    # Left wall
+    _add_wall_segments(left_x+half_width, bottom_y, top_y, vertical=True)
+    # Top wall
+    _add_wall_segments(top_y+half_length, left_x, right_x, vertical=False)
+    # Right wall
+    _add_wall_segments(right_x+half_width, bottom_y, top_y, vertical=True)
+    # Bottom wall
+    _add_wall_segments(bottom_y+half_length, left_x, right_x, vertical=False)
 
     return walls
+
 
 class Hallway:
     """
