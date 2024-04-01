@@ -26,49 +26,50 @@ class BoxMap():
     def get_seed(self) -> int:
         return self.map.get_seed()
     
-    def draw_map(self, show:bool=False):
+    def draw_map(self, show: bool = False):
         """
-        Draws a matplot graph of the tiles to visualize the tile map
+        Draws a matplotlib graph of the tiles to visualize the tile map.
         """
-        _ , ax = plt.subplots()
+        _, ax = plt.subplots()
 
-        x,y =self.map.map_size
+        x, y = self.map.map_size
         ax.set_xlim(0, x)
         ax.set_ylim(0, y)
 
-        color_map = {"floor" : 'grey',
-                    "wall" : 'green',
-                    "target": 'red',
-                    "traversed_target": 'green'}
+        color_map = {
+            "floor": 'grey',
+            "wall": 'green',
+            "target": 'red',
+            "traversed_target": 'green'
+        }
 
-        for tile in self.get_floors():
-            left_x , bottom_y, right_x, top_y = tile.get_boundaries()
+        # Plot floor tiles
+        for tile in self.get_floors():  # Assuming get_floors() returns iterable of floor tiles
+            left_x, bottom_y, right_x, top_y = tile.get_boundaries()
 
             width = right_x - left_x
             height = top_y - bottom_y
 
-            # Add tile
-            center = (right_x - (width/2), top_y - (height/2))
-            rect = patches.Rectangle(center, width, height, linewidth=0.2, edgecolor='black', facecolor=color_map.get("floor"))
+            # Corrected to use bottom-left corner for Rectangle
+            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=0.2, edgecolor='black', facecolor=color_map["floor"])
             ax.add_patch(rect)
-            
+
             # Add target
             target = tile.get_target()
             target_X, target_Y = target.get_coordinates()
             target_color = "target" if target.get_times_traversed() == 0 else 'traversed_target'
-            target = patches.Circle((target_X,target_Y), 0.1, color=color_map.get(target_color))
-            ax.add_patch(target)
+            target_patch = patches.Circle((target_X, target_Y), 0.1, color=color_map[target_color])
+            ax.add_patch(target_patch)
 
-        for tile in self.get_walls():
-            
-            left_x , bottom_y, right_x, top_y = tile.get_boundaries()
+        # Plot wall tiles
+        for tile in self.get_walls():  # Assuming get_walls() returns iterable of wall tiles
+            left_x, bottom_y, right_x, top_y = tile.get_boundaries()
 
             width = right_x - left_x
             height = top_y - bottom_y
 
-            # Add tile
-            center = (right_x - (width/2), top_y - (height/2))
-            rect = patches.Rectangle(center, width, height, linewidth=0.2, edgecolor='black', facecolor=color_map.get("wall"))
+            # Corrected to use bottom-left corner for Rectangle
+            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=0.2, edgecolor='black', facecolor=color_map["wall"])
             ax.add_patch(rect)
 
         if show:
@@ -137,7 +138,6 @@ def _build(mst: MST, target_offset) -> tuple:
     for room in rooms:
         floors.append(room.get_floor())
         walls += room.get_walls()
-    print(hallway_floors)
     floors += hallway_floors
     # walls += hallway_walls TODO: add back when walls can be built
     

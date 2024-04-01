@@ -43,7 +43,6 @@ class FloorTile(Tile):
         if target_offset != 0:
             target_X += random.uniform(-target_offset, target_offset)
             target_Y += random.uniform(-target_offset, target_offset)
-        
         self.target = Target(target_X, target_Y)
         self._tile_type = "floor"
     
