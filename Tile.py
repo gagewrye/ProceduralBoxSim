@@ -8,18 +8,20 @@ class Tile():
     Base tile Class
     """
     def __init__(self, left_X, bottom_Y, right_X, top_Y):
-        self.right_X_boundary = right_X
-        self.top_Y_boundary = top_Y
-        self.left_X_boundary = left_X
-        self.bottom_Y_boundary = bottom_Y
-        self.tile_type = "tile"
+        self._right_X_boundary = right_X
+        self._top_Y_boundary = top_Y
+        self._left_X_boundary = left_X
+        self._bottom_Y_boundary = bottom_Y
+        self._tile_type = "tile"
     
-    def get_boundaries(self):
+    def get_boundaries(self) -> tuple:
         # X > neg_X, Y > neg_Y
-        return self.left_X_boundary, self.bottom_Y_boundary, self.right_X_boundary, self.top_Y_boundary
+        return self._left_X_boundary, self._bottom_Y_boundary, self._right_X_boundary, self._top_Y_boundary
 
-    def get_type(self):
-        return self.tile_type
+    def get_type(self) -> str:
+        return self._tile_type
+    def set_type(self, type: str):
+        self._tile_type = type
 
 class WallTile(Tile):
     """
@@ -27,7 +29,7 @@ class WallTile(Tile):
     """
     def __init__(self, X, Y, neg_X, neg_Y):
         super().__init__(X, Y, neg_X, neg_Y)
-        self.tile_type = "wall"
+        self._tile_type = "wall"
 
 class FloorTile(Tile):
     """
@@ -44,7 +46,7 @@ class FloorTile(Tile):
             target_Y += rand.random(-target_offset, target_offset)
         
         self.target = Target(target_X, target_Y)
-        self.tile_type = "floor"
+        self._tile_type = "floor"
     
     def get_target(self) -> 'Target':
         return self.target
@@ -66,25 +68,43 @@ class Target():
     It stores the coordinates of the target, nearby Target objects, and the number of times the target has been traversed.
     """
     def __init__(self, x, y):
-        self.coordinates = (x,y)
-        self.times_traversed = 0
-        self.adjacent_targets = set()
+        self._coordinates = (x,y)
+        self._times_traversed = 0
+        self._adjacent_targets = set()
     
+    def get_times_traversed(self) -> int:
+        return self._times_traversed
+    def get_coordinates(self) -> tuple:
+        return self._coordinates
     def get_adjacent_targets(self) -> set['Target']:
-        return self.adjacent_targets
+        """
+        Returns a list of targets that can be traveled to from this target
+        """
+        return self._adjacent_targets
     def add_target(self, target: 'Target'):
-        self.adjacent_targets.add(target)
+        """
+        Add a target to this targets's list of adjacent targets
+        """
+        self._adjacent_targets.add(target)
     def remove_target(self, target: 'Target'):
-        self.adjacent_targets.remove(target)
+        """
+        Remove a target from this target's list of adjacent targets
+        """
+        self._adjacent_targets.remove(target)
     def traverse(self):
-        self.times_traversed += 1
-    def times_traversed(self) -> int:
-        return self.times_traversed
+        self._times_traversed += 1
     def reset(self):
-        self.times_traversed = 0
+        """
+        Sets times_traveresed back to 0
+        """
+        self._times_traversed = 0
 
 def draw_map(tiles, x, y):
+    """
+    Draws a matplot graph of the tiles to visualize the tile map
+    """
     _ , ax = plt.subplots()
+
 
     ax.set_xlim(0, x)
     ax.set_ylim(0, y)
