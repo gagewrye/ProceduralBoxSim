@@ -32,15 +32,15 @@ class FloorTile(Tile):
     """
     Floor with a target somewhere around the center, depending on how high target_offset is.
     """
-    def __init__(self, left_X_boundary, bottom_Y_boundary, right_X_boundary, top_Y_boundary, target_offset=0, rand:random=None):
+    def __init__(self, left_X_boundary, bottom_Y_boundary, right_X_boundary, top_Y_boundary, target_offset=0):
         super().__init__(left_X_boundary, bottom_Y_boundary, right_X_boundary, top_Y_boundary)
         # default target is in the center
         target_X = right_X_boundary - ((right_X_boundary - left_X_boundary)/2)
         target_Y = top_Y_boundary - ((top_Y_boundary - bottom_Y_boundary)/2)
 
         if target_offset != 0:
-            target_X += rand.random(-target_offset, target_offset)
-            target_Y += rand.random(-target_offset, target_offset)
+            target_X += random.random(-target_offset, target_offset)
+            target_Y += random.random(-target_offset, target_offset)
         
         self.target = Target(target_X, target_Y)
         self._tile_type = "floor"

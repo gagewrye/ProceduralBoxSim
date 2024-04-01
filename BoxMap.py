@@ -4,7 +4,6 @@ from Tile import FloorTile, WallTile
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import MinimumSpanningTree
-import random
 
 
 class BoxMap():
@@ -13,9 +12,9 @@ class BoxMap():
     The building is represented using floor tiles and wall tiles.
     Targets can be extracted from the floor tiles. (See FloorTile class in Tile.py)
     """
-    def __init__(self, mst: MST, rand: random, target_offset=0) -> None:
+    def __init__(self, mst: MST, target_offset=0) -> None:
         self.map = mst
-        self.floors, self.walls = _build(mst, target_offset, rand)
+        self.floors, self.walls = _build(mst, target_offset)
         self.targets = {}
     
     def get_tiles(self) -> list:
@@ -27,7 +26,7 @@ class BoxMap():
     def get_seed(self) -> int:
         return self.map.get_seed()
     
-    def draw_map(self):
+    def draw_map(self, show:bool=False):
         """
         Draws a matplot graph of the tiles to visualize the tile map
         """
@@ -61,7 +60,8 @@ class BoxMap():
             
             ax.add_patch(rect)
 
-    plt.show()
+        if show:
+            plt.show()
 
 def _hallway_blueprint(mst: MST) -> list:
     # save the hallway as a list of point pairs
@@ -80,21 +80,21 @@ def _hallway_blueprint(mst: MST) -> list:
                 hallways.append((room1, room2))
     return hallways
 
-def _construct_rooms(rooms: list, max_size: int, target_offset, rand: random) -> list[Room]:
+def _construct_rooms(rooms: list, max_size: int, target_offset) -> list[Room]:
     # list of rooms, passed into Room class to avoid collisions and overwriting
     rooms = list[Room]
     for room in rooms:
-        addition = Room(room, max_size, rooms, target_offset, rand)
+        addition = Room(room, max_size, rooms, target_offset)
         rooms.append(addition)
     return rooms
 
-def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset, rand) -> list[Hallway]:
+def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> list[Hallway]:
     other_floors = list[FloorTile]
     walls = list[WallTile]
     hallways = list[Hallway]
     # Build Hallway floors
     for start, end in planned_hallways:
-        hallway = Hallway(start, end, rooms, other_floors, target_offset, rand)
+        hallway = Hallway(start, end, rooms, other_floors, target_offset)
         other_floors += hallway.get_floors()
         hallways.append(hallway)
     # Build hallway walls
@@ -103,7 +103,7 @@ def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset, ran
         walls.append(hallway.get_walls())
     return other_floors, walls
 
-def _build(mst: MST, target_offset, rand: random) -> tuple:
+def _build(mst: MST, target_offset) -> tuple:
     """
     Returns: a list of rooms and hallways
     """
@@ -115,9 +115,9 @@ def _build(mst: MST, target_offset, rand: random) -> tuple:
     planned_hallways = _hallway_blueprint(mst)
 
     # place rooms
-    rooms = _construct_rooms(planned_rooms, mst.get_max_room_size(), target_offset, rand)
+    rooms = _construct_rooms(planned_rooms, mst.get_max_room_size(), target_offset)
     # connect rooms
-    hallway_floors, hallway_walls = _construct_hallways(planned_hallways, rooms, target_offset, rand)
+    hallway_floors, hallway_walls = _construct_hallways(planned_hallways, rooms, target_offset)
 
     # separate floors and walls
     for room in rooms:

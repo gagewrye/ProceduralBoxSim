@@ -6,11 +6,11 @@ class MST():
     This class creates a minimum spanning tree using a dictionary with (X,Y) vertices as
     the keys and a value of a list of vertices that the key is connected to.
     """
-    def __init__(self, num_points: int, map_size_x: int, map_size_y: int, max_room_size: int, seed: int, rand: random) -> None:
+    def __init__(self, num_points: int, map_size_x: int, map_size_y: int, max_room_size: int, seed: int) -> None:
         self.seed = seed
         self.map_size = (map_size_x, map_size_y)
         self.max_room_size = max_room_size
-        self.vertices = _create_points(num_points, map_size_x, map_size_y, rand, max_room_size)
+        self.vertices = _create_points(num_points, map_size_x, map_size_y, max_room_size)
         graph = _generate_graph(self.vertices)
         self.mst = _prims_algorithm(graph, next(iter(graph)))
     
@@ -49,11 +49,11 @@ class MST():
                 break  # No more connections to add - you have turned it back into a fully connected graph!
 
 
-def _create_points(num_points: int, x: int, y: int, rand: random, max_room_size: int) -> list:
+def _create_points(num_points: int, x: int, y: int, max_room_size: int) -> list:
     points = []
     buffer = max_room_size
     for _ in range(num_points):
-        points.append((rand.randint(0+buffer,x-buffer), rand.randint(0+buffer,y-buffer)))
+        points.append((random.randint(0+buffer,x-buffer), random.randint(0+buffer,y-buffer)))
     return points
 
 def manhattan_distance(point1, point2):
@@ -96,9 +96,3 @@ def directly_connected(mst: MST, room1: tuple, room2: tuple) -> bool:
         if dest == room1:
             return True
     return False
-
-
-# Example
-rand = random.Random(47)
-mst = MST(5, 100, 100, rand)
-mst.add_cycles(5)

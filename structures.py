@@ -1,6 +1,7 @@
-import Tile
+from Tile import FloorTile, WallTile, Target
+from functools import partial
 import random
-import partial
+
 """
 Rooms and Hallways
 """
@@ -10,43 +11,41 @@ class Room():
 
     Contains a single floor tile and multiple surrounding walls
     """
-    def __init__(self, vertex: tuple, max_room_size: int, other_rooms: list['Room'], target_offset, rand: random):
+    def __init__(self, vertex: tuple, max_room_size: int, other_rooms: list['Room'], target_offset):
         x, y = vertex
         
-        top_Y = y + rand.randint(0, max_room_size)
-        right_X = x + rand.randint(0,max_room_size)
-        left_X = x - rand.randint(0,max_room_size)
-        bottom_Y = y - rand.randint(0, max_room_size)
+        top_Y = y + random.randint(0, max_room_size)
+        right_X = x + random.randint(0,max_room_size)
+        left_X = x - random.randint(0,max_room_size)
+        bottom_Y = y - random.randint(0, max_room_size)
 
         self.center = ((right_X - left_X) , (top_Y - bottom_Y))
         self.boundaries = (left_X, bottom_Y, right_X, top_Y)
-        self.floor = _build_floor(self.boundaries, target_offset, rand)
+        self.floor = _build_floor(self.boundaries, target_offset)
         self.walls = _build_walls(self.floor, other_rooms)
         
         
     def get_tiles(self) -> list:
-        tiles = []
-        tiles.append(self.floor)
-        tiles.extend(self.walls)
-        return tiles
-    def get_floor(self) -> Tile.FloorTile:
+        return [self.floor] + self.walls
+    def get_floor(self) -> FloorTile:
         return self.floor
-    def get_walls(self) -> list[Tile.WallTile]:
+    def get_walls(self) -> list[WallTile]:
         return self.walls
-    def get_target(self) -> Tile.Target:
+    def get_target(self) -> Target:
         return self.floor.get_target()
-    def add_target(self, target: Tile.Target) -> None:
-        self.floor.add_adjacent_target(target)
+    def add_target(self, target: Target) -> None:
+        curr_targ = self.get_target()
+        curr_targ.add_target(target)
     
     def contains(self, x, y) -> bool:
         left_x, bottom_y, right_x, top_y = self.floor.get_boundaries()
         return ((left_x - 1 <= x < right_x) and (bottom_y - 1 <= y < top_y))
     
-def _build_floor(boundaries: tuple, target_offset: float, rand: random) -> Tile.FloorTile:
+def _build_floor(boundaries: tuple, target_offset: float) -> FloorTile:
     left_x, bottom_y, right_x, top_y = boundaries
-    return Tile.FloorTile(left_x, bottom_y, right_x, top_y, target_offset, rand)
+    return FloorTile(left_x, bottom_y, right_x, top_y, target_offset)
 
-def _build_walls(floor: Tile.FloorTile, other_rooms) -> list:
+def _build_walls(floor: FloorTile, other_rooms) -> list:
     walls = []
     left_x, bottom_y, right_x, top_y = floor.get_boundaries()
 
@@ -63,15 +62,15 @@ def _build_walls(floor: Tile.FloorTile, other_rooms) -> list:
                 start = pos
             elif is_blocked and start is not None:
                 if vertical:
-                    walls.append(Tile.FloorTile.WallTile(constant, start, constant, pos - 1))
+                    walls.append(WallTile(constant, start, constant, pos - 1))
                 else:
-                    walls.append(Tile.FloorTile.WallTile(start, constant, pos - 1, constant))
+                    walls.append(WallTile(start, constant, pos - 1, constant))
                 start = None
             elif not is_blocked and pos == range_end:
                 if vertical:
-                    walls.append(Tile.FloorTile.WallTile(constant, start, constant, pos))
+                    walls.append(WallTile(constant, start, constant, pos))
                 else:
-                    walls.append(Tile.FloorTile.WallTile(start, constant, pos, constant))
+                    walls.append(WallTile(start, constant, pos, constant))
         
     # Add wall segments around the perimeter
     _add_wall_segments(left_x - 1, bottom_y, top_y, vertical=True)  # Left
@@ -91,7 +90,7 @@ class Hallway:
         self.vertex1 = start
         self.vertex2 = end
         self.floors = _build_hallway(start, end, rooms, other_floors)
-        self.walls = list[Tile.WallTile]
+        self.walls = list[WallTile]
         
     def get_hallway(self):
         return self.walls + self.floors
@@ -109,9 +108,8 @@ class Hallway:
         self.walls += walls_to_add
     
 def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
-                   other_floors: list[Tile.FloorTile], target_offset,
-                    rand) -> list[Tile.FloorTile]:
-    _add_floor = partial(_add_floor_and_targets, target_offset=target_offset, rand=rand)
+                   other_floors: list[FloorTile], target_offset) -> list[FloorTile]:
+    _add_floor = partial(_add_floor_and_targets, target_offset=target_offset)
     hallway_floors = []
     start_x, start_y = start
     end_x, end_y = end
@@ -188,9 +186,9 @@ def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
                 return room
         return None
 
-    def _add_floor_and_targets(x, y, other_floors: list[Tile.FloorTile], hallway_floors, target_offset, rand, target=None):
+    def _add_floor_and_targets(x, y, other_floors: list[FloorTile], hallway_floors, target_offset, target=None):
         if not any(floor.X_boundary == x and floor.Y_boundary == y for floor in other_floors):
-            new_floor = Tile.FloorTile(x, y, x+1, y+1, target_offset, rand)
+            new_floor = FloorTile(x, y, x+1, y+1, target_offset)
             if target: # Link the floor tile with the room's target
                 new_floor.add_adjacent_target(target)
                 target.add_adjacent_target(new_floor)
@@ -211,7 +209,7 @@ def _check_surrounding_for_floors(x, y, all_tiles):
         adj_x, adj_y = x + dx, y + dy
         # Check if there's a floor at each surrounding position
         for tile in all_tiles:
-            if isinstance(tile, Tile.FloorTile) and tile.x == adj_x and tile.y == adj_y:
+            if isinstance(tile, FloorTile) and tile.x == adj_x and tile.y == adj_y:
                 surrounding_floors.append(tile)
 
     return surrounding_floors
