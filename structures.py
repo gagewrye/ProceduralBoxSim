@@ -69,17 +69,14 @@ def _build_walls(floor: FloorTile, other_rooms: list[Room]) -> list:
                         walls.append(WallTile(start, constant, pos - 1, constant))
                     start = None  # Reset start for the next segment
     
-    # I'm not sure why adding these fixes it, but it does
-    half_width = (right_x - left_x) / 2.0
-    half_length = (top_y - bottom_y) / 2.0
     # Left wall
-    _add_wall_segments(left_x+half_width, bottom_y, top_y, vertical=True)
+    _add_wall_segments(left_x, bottom_y, top_y, vertical=True)
     # Top wall
-    _add_wall_segments(top_y+half_length, left_x, right_x, vertical=False)
+    _add_wall_segments(top_y, left_x, right_x, vertical=False)
     # Right wall
-    _add_wall_segments(right_x+half_width, bottom_y, top_y, vertical=True)
+    _add_wall_segments(right_x, bottom_y, top_y, vertical=True)
     # Bottom wall
-    _add_wall_segments(bottom_y+half_length, left_x, right_x, vertical=False)
+    _add_wall_segments(bottom_y, left_x, right_x, vertical=False)
 
     return walls
 
