@@ -1,4 +1,4 @@
-import Tile
+from Tile import Target, FloorTile
 
 class TargetHandler():
     """
@@ -7,7 +7,7 @@ class TargetHandler():
     Maps coordinates to corresponding Target objects
     """
     def __init__(self) -> None:
-        self.targets : dict[tuple, Tile.Target] = {}
+        self.targets : dict[tuple, Target] = {}
     
     
     def find_new_target(self, current_coordinates: tuple) -> tuple:
@@ -33,22 +33,22 @@ class TargetHandler():
         coordinate, target = next(iter(self.targets.items()))
         return coordinate
     
-    def get_current_target(self, current_coordinates: tuple) -> Tile.Target:
+    def get_current_target(self, current_coordinates: tuple) -> Target:
         return self.targets.get(current_coordinates)
 
-    def get_adjacent_targets(self, coordinates: tuple) -> set[Tile.Target]:
+    def get_adjacent_targets(self, coordinates: tuple) -> set[Target]:
         """
         Returns a list of Target Objects that can be traveled to from this target
         """
         target = self.targets.get(coordinates)
         return target.get_adjacent_targets()
     
-    def add_targets_from_tiles(self, tiles: list[Tile.FloorTile]) -> None:
+    def add_targets_from_tiles(self, tiles: list[FloorTile]) -> None:
         for tile in tiles:
             target = tile.get_target()
             self.targets[target.get_coordinates()] = target
 
-    def _add_target(self, target: Tile.Target) -> None:
+    def _add_target(self, target: Target) -> None:
         """
         Adds a single target
         """

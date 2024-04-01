@@ -1,8 +1,9 @@
 from argparse import ArgumentParser, Namespace
+from TargetHandler import TargetHandler
+from BoxMap import BoxMap
+from MinimumSpanningTree import MST
 import random
-import MinimumSpanningTree
-import ConstructMap
-import Tile
+
 
 def parse_args() -> Namespace:
     arg_parser = ArgumentParser("Train command classification networks.")
@@ -25,12 +26,20 @@ def parse_args() -> Namespace:
 def __main__():
     args = parse_args()
     rand = random.seed(args.room_seed)
-    mst = MinimumSpanningTree.MST(args.num_rooms, args.map_size_x, args.map_size_y, args.max_room_size, args.room_seed, rand)
-    mst.add_cycles(args.num_cycles)
-    map = ConstructMap.BoxMap(mst, rand, args.target_offset) # Build Rooms and Hallways
-    # TODO: Save map somewhere
-    tiles = map.get_tiles()
-    Tile.draw_map(tiles, args.map_size_x, args.map_size_y)
 
-if __name__ == "__main__":
-    main()
+    # Create Minimum Spanning Tree and add cycles to it
+    mst = MST(args.num_rooms, args.map_size_x, args.map_size_y, args.max_room_size, args.room_seed, rand)
+    mst.add_cycles(args.num_cycles)
+    
+    # Build Rooms and Hallways
+    map = BoxMap(mst, rand, args.target_offset)
+    floors = map.get_floors()
+    
+    # Create Interface
+    target_handler = TargetHandler()
+    target_handler.add_targets_from_tiles(floors)
+    
+    # visualize
+    map.draw_map()
+    
+    # TODO: Save map somewhere

@@ -1,5 +1,3 @@
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import random
 
 # Note: tiles are built using the vertex as the bottom left corner
@@ -15,7 +13,6 @@ class Tile():
         self._tile_type = "tile"
     
     def get_boundaries(self) -> tuple:
-        # X > neg_X, Y > neg_Y
         return self._left_X_boundary, self._bottom_Y_boundary, self._right_X_boundary, self._top_Y_boundary
 
     def get_type(self) -> str:
@@ -50,16 +47,6 @@ class FloorTile(Tile):
     
     def get_target(self) -> 'Target':
         return self.target
-    def get_adjacent_targets(self) -> set[tuple]:
-        return self.target.get_adjacent_targets()
-    def get_times_traversed(self) -> int:
-        return self.target.times_traversed()
-    def add_adjacent_target(self,target):
-        self.target.add_target(target)
-    def remove_adjacent_target(self,target):
-        self.target.remove_target(target)
-    def traverse(self):
-        self.target.traverse()
 
 class Target():
     """
@@ -98,42 +85,4 @@ class Target():
         Sets times_traveresed back to 0
         """
         self._times_traversed = 0
-
-def draw_map(tiles, x, y):
-    """
-    Draws a matplot graph of the tiles to visualize the tile map
-    """
-    _ , ax = plt.subplots()
-
-
-    ax.set_xlim(0, x)
-    ax.set_ylim(0, y)
-
-    color_map = {"floor" : 'grey',
-                "wall" : 'blue',
-                "target": 'red',
-                "traversed_target": 'green'}
-
-    for tile in tiles:
-        left_x , bottom_y, right_x, top_y = tile.get_boundaries()
-        tile_type = tile.get_type()
-
-        width = right_x - left_x
-        height = top_y - bottom_y
-
-        # Create a rectangle patch for each tile
-        center = (right_x - (width/2), top_y - (height/2))
-        rect = patches.Rectangle(center, width, height, linewidth=1, edgecolor='black', facecolor=color_map.get(tile_type, "grey"))
-        
-        if tile_type == "floor": # add target
-            target_X, target_Y = tile.get_target()
-            target_color = "target" if tile.get_times_traversed() == 0 else 'traversed_target'
-            target = patches.Circle((target_X,target_Y), 0.1, color=color_map.get(target_color))
-            ax.add_patch(target)
-        
-        ax.add_patch(rect)
-
-    # hide axis
-    plt.axis('off')
-    plt.show()
 

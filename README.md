@@ -11,23 +11,31 @@
 7. Convert this map to unreal engine environment
 
 ## Data Structures:
-1. Something that simultaneously tracks the number of times every block has been traversed. Once all of the blocks traversed >= 1, then we will know that the environment has been fully explored. We could probably use an array that stores the references/pointers to every Target's traversion count and then return false if any are 0.
+Done: Map interface
+
 Done: tiles
+
 Done: Minimum Spanning Tree
+
 Done: Rooms and Hallways
 
 
 
 ## Algorithms:
 
-1. Hallway generator to connect a room to another room. It builds only in the x/-x and y/-y directions to simplify the process. build_walls, a function to build walls around a hallway, needs to be finished.
+1. Hallway generator to connect a room to another room. It builds only in the x/-x and y/-y directions to simplify the process. build_walls, a function to build walls around a hallway, needs to be finished. We should probable edit the build_hallway method to include more complex construction, since it just builds in the horizontal direction and then in the vertical direction.
+
 Done: Room generator, input a point and build a randomly sized room around it using a floor tile and wall tiles.
+
 Done: Prim's
+
 Done: Point placer and graph generator
 
 ## Main generation function:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
-Output: Map size, tile objects, traversal tracker
+
+Output: Map size, tile objects, TargetHandler
+
 
 
 
