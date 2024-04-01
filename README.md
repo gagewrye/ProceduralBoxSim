@@ -2,7 +2,7 @@
 
 ## Overview:
 
-The map generates the rooms mostly correct. Some rooms are build inside of other rooms. The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made.
+The map generates the rooms well, some rooms are built inside of other rooms though. The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made too.
 
 Maybe the room.contains() function isn't working correctly? I'm not sure why they are nesting like that.
 
