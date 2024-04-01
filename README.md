@@ -38,7 +38,7 @@ Done: Point placer and graph generator
 ## Main generation function:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
 
-Output: BoxMap pkl, TargetHandler pkl, visual map
+Output: BoxMap pkl, TargetHandler pkl, visual mape
 
 
 
