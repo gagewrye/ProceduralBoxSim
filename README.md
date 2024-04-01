@@ -2,6 +2,10 @@
 
 ## Overview:
 
+The map generates the rooms mostly correct. Some rooms are build inside of other rooms. The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made.
+
+Maybe the room.contains() function isn't working correctly? I'm not sure why they are nesting like that.
+
 1. Define the size of the 2d plane
 2. Place random points on the plane
 3. Connect every point to every other point to create a fully connected graph. Calculate the manhattan distance between each room to use for the weights edges
@@ -34,7 +38,7 @@ Done: Point placer and graph generator
 ## Main generation function:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
 
-Output: Map size, tile objects, TargetHandler
+Output: BoxMap pkl, TargetHandler pkl, visual map
 
 
 
