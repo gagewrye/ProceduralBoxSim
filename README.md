@@ -27,4 +27,4 @@
 ## generate_map.py:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
 
-Output: BoxMap pkl, TargetHandler pkl, map visualization image - These are saved in a folder title with the seed number
+Output: BoxMap pkl, TargetHandler pkl, map image and Unreal Engine map - These are saved in a folder titled with the seed number
