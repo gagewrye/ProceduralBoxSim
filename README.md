@@ -23,33 +23,8 @@
 6. For every edge, build a hallway that connects a room to the room at the other end.
 7. Convert this map to unreal engine environment
 
-## Data Structures:
-Done: Map interface
 
-Done: tiles
-
-Done: Minimum Spanning Tree
-
-Done: Rooms and Hallways
-
-
-
-## Algorithms:
-
-1. Hallway generator to connect a room to another room. It builds only in the x/-x and y/-y directions to simplify the process. build_walls, a function to build walls around a hallway, needs to be finished. We should probable edit the build_hallway method to include more complex construction, since it just builds in the horizontal direction and then in the vertical direction.
-
-Done: Room generator, input a point and build a randomly sized room around it using a floor tile and wall tiles.
-
-Done: Prim's
-
-Done: Point placer and graph generator
-
-## Main generation function:
+## generate_map.py:
 Inputs: map size (X x Y), number of rooms, minimum room size, maximum room size, seed for random function (int)
 
-Output: BoxMap pkl, TargetHandler pkl, visual mape
-
-
-
-
-The result should be mostly compatible with boxnav, hopefully
+Output: BoxMap pkl, TargetHandler pkl, map visualization image - These are saved in a folder title with the seed number
