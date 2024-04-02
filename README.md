@@ -12,8 +12,8 @@
 
 - Find a way to integrate into BoxNav
 
-- Figure out how to turn the floor and tile objects into unreal engine assets
-
+- Test ue_map_generator
+  
 ## Overview:
 1. Define the size of the 2d plane
 2. Place random points on the plane
