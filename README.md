@@ -1,11 +1,20 @@
 # ProceduralBoxSim
 
+
+## TODO:
+
+
+- The map generates the rooms well, some rooms are built inside of other rooms though. Possible fixes:
+1. Generate walls after building the room and hallway floors. This would give the hallways and entrance to the rooms too, getting two birds stoned at once. Remove the _build_hallways() method from Room Class and place it outside as a separate callable method.
+2. Check if the center of every room is inside another room and delete that room. We could probably do this in addition to #1
+
+
+- The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made too.
+
+
+- Find a way to integrate into BoxNav
+
 ## Overview:
-
-The map generates the rooms well, some rooms are built inside of other rooms though. The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made too.
-
-Maybe the room.contains() function isn't working correctly? I'm not sure why they are nesting like that.
-
 1. Define the size of the 2d plane
 2. Place random points on the plane
 3. Connect every point to every other point to create a fully connected graph. Calculate the manhattan distance between each room to use for the weights edges
