@@ -1,7 +1,8 @@
+from ue_map_generator import ue_map_generator
 from argparse import ArgumentParser, Namespace
 from TargetHandler import TargetHandler
 from BoxMap import BoxMap
-from MinimumSpanningTree import MST
+from BoxMap_assets import MST
 import matplotlib.pyplot as plt
 import random
 import pickle
@@ -18,6 +19,7 @@ def parse_args() -> Namespace:
     arg_parser.add_argument("--max_room_size", type=int, default=10, help="How large the rooms can be")
     arg_parser.add_argument("--target_offset", type=int, default=0, help="Offsets the targets from the center. Higher numbers can be further away. Keep below floor size / 2")
     arg_parser.add_argument("--num_cycles", type=int, default=2, help="Cycles will add complexity and loops to the map, creating more challenging exploration")
+    arg_parser.add_argument("--ue_scaling_factor", type=int, default=100, help="Scales the tiles up for Unreal Engine map")
     
     return arg_parser.parse_args()
 
@@ -39,23 +41,26 @@ def main():
     target_handler = TargetHandler()
     target_handler.add_targets_from_tiles(floors)
     
+    # build unreal engine map
+    ue_map = ue_map_generator(map, args.ue_scaling_factor)
 
     # Create a directory named after the seed
     directory_name = f"./{args.room_seed}"
     os.makedirs(directory_name, exist_ok=True)
 
     # visualize and save image
-    
     map.draw_map(show=False)
     plt.savefig(os.path.join(directory_name, "map_visualization.png"))
     plt.close()  
-    
-    # Save map and target handler as pickle files
+
+    # Save BoxNav map, target handler, and Unreal Engine map as pickle files
     print("Saving to {directory_name}")
-    with open(os.path.join(directory_name, "map_obj.pkl"), 'wb') as map_file:
+    with open(os.path.join(directory_name, "BoxNav_map.pkl"), 'wb') as map_file:
         pickle.dump(map, map_file)
     with open(os.path.join(directory_name, "target_handler.pkl"), 'wb') as target_file:
         pickle.dump(target_handler, target_file)
+    with open(os.path.join(directory_name, "ue_map.pkl"), 'wb') as ue_map_file:
+        pickle.dump(ue_map, ue_map_file)
 
 
 if __name__ == '__main__':

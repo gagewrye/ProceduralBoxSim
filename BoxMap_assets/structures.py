@@ -1,4 +1,4 @@
-from Tile import FloorTile, WallTile, Target
+from BoxMap_assets.Tile import FloorTile, WallTile, Target
 import random
 
 """

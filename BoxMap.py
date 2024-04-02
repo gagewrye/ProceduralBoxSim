@@ -1,9 +1,7 @@
-from structures import Hallway, Room
-from MinimumSpanningTree import MST
-from Tile import FloorTile, WallTile
+from BoxMap_assets import Hallway, Room, MST, MinimumSpanningTree, FloorTile, WallTile
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-import MinimumSpanningTree
+
 
 
 class BoxMap():

@@ -1,4 +1,4 @@
-from Tile import Target, FloorTile
+from BoxMap_assets.Tile import Target, FloorTile
 
 class TargetHandler():
     """
