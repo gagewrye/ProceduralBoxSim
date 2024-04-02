@@ -8,11 +8,11 @@
 1. Generate walls after building the room and hallway floors. This would give the hallways and entrance to the rooms too, getting two birds stoned at once. Remove the _build_hallways() method from Room Class and place it outside as a separate callable method.
 2. Check if the center of every room is inside another room and delete that room. We could probably do this in addition to #1
 
-
 - The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made too.
 
-
 - Find a way to integrate into BoxNav
+
+- Figure out how to turn the floor and tile objects into unreal engine assets
 
 ## Overview:
 1. Define the size of the 2d plane
