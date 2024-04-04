@@ -12,10 +12,10 @@ import os
 def parse_args() -> Namespace:
     arg_parser = ArgumentParser(description="Train command classification networks.")
 
-    arg_parser.add_argument("--num_rooms", type=int, default=4, help="Number of rooms on map")
-    arg_parser.add_argument("--room_seed", type=int, default=4, help="Determines what the map looks like")
-    arg_parser.add_argument("--map_size_x", type=int, default=100, help="X-axis size")
-    arg_parser.add_argument("--map_size_y", type=int, default=100, help="Y-axis size")
+    arg_parser.add_argument("--num_rooms", type=int, default=5, help="Number of rooms on map")
+    arg_parser.add_argument("--room_seed", type=int, default=7, help="Determines what the map looks like")
+    arg_parser.add_argument("--map_size_x", type=int, default=80, help="X-axis size")
+    arg_parser.add_argument("--map_size_y", type=int, default=80, help="Y-axis size")
     arg_parser.add_argument("--max_room_size", type=int, default=10, help="How large the rooms can be")
     arg_parser.add_argument("--target_offset", type=int, default=0, help="Offsets the targets from the center. Higher numbers can be further away. Keep below floor size / 2")
     arg_parser.add_argument("--num_cycles", type=int, default=2, help="Cycles will add complexity and loops to the map, creating more challenging exploration")

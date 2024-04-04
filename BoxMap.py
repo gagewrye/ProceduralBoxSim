@@ -120,7 +120,7 @@ def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> 
         walls.extend(hallway.get_walls())
     # Build hallway walls
     for hallway in hallways:
-        hallway.build_walls(hallways, rooms) # TODO: finish function
+        hallway.build_walls(hallways, rooms, floors) # TODO: finish function
         # walls.append(hallway.get_walls())
     return floors, walls
 
