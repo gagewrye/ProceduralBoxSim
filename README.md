@@ -1,14 +1,17 @@
 # ProceduralBoxSim
 
+This project is intended to randomly generate maps of varying size and complexity for training an agent to explore a simulated environment. The intended path of travel can be set to create a 'wandering' effect by increasing the target offset - this will place the targets away from the center of the floor tiles.
+
+Running generate_map.py will create a map visual with floors, walls, target, and target connections. It will also create a map object and a target handler interface that allows you to traverse the map and track where you have traversed.
 
 ## TODO:
 
 
 - The map generates the rooms well, some rooms are built inside of other rooms though. Possible fixes:
-1. Generate walls after building the room and hallway floors. This would give the hallways and entrance to the rooms too, getting two birds stoned at once. Remove the _build_hallways() method from Room Class and place it outside as a separate callable method.
+1. Generate walls after building the room and hallway floors. This would give the hallways an entrance to the rooms too, getting two birds stoned at once. Remove the _build_hallways() method from Room Class and place it outside as a separate callable method.
 2. Check if the center of every room is inside another room and delete that room. We could probably do this in addition to #1
 
-- The hallways usually work, but they get confused by the nested rooms. Hallway wall building function needs to be made too.
+- The hallways usually work, but they sometimes build walls blocking other hallways. The also dont fully connect with the rooms. Maybe setting the room contains check to a smaller area will fix it.
 
 - Find a way to integrate into BoxNav
 
