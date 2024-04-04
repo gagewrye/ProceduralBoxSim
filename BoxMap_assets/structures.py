@@ -103,7 +103,7 @@ class Hallway:
     def get_walls(self):
         return self.walls
     
-    def build_walls(self, hallway_floors: list, rooms: list):
+    def build_walls(self, wall_locations, floor_locations: list, rooms: list):
         walls_to_add = []
         # TODO: Add wall building logic
 
@@ -147,8 +147,7 @@ def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
         if room: # Entering room
             start_target = room.get_target()
             # link room to entering hallway
-            room.add_target(hallway_floors[-1].get_target())
-            hallway_floors[-1].add_target(room.get_target())
+            _link_targets(start_target, hallway_floors[-1].get_target())
             # traverse through room
             while current_x != end_x:
                 current_x += x_step
@@ -162,6 +161,22 @@ def _build_hallway(start: tuple, end: tuple, rooms: list[Room],
         _add_hall_walls(rooms, hallway_walls, floor_locations, wall_locations, "horizontal", (current_x,current_y))
         start_target = None
         current_x += x_step
+
+    # Turning point
+    if current_y < end_y and x_step == -1:  # Going left up
+        _put_wall(current_x, current_y-1, rooms, wall_locations, floor_locations, hallway_walls)
+        _put_wall(current_x-1, current_y-1, rooms, wall_locations, floor_locations, hallway_walls)
+    if current_y > end_y and x_step == -1:  # Going left down
+        _put_wall(current_x, current_y+1, rooms, wall_locations, floor_locations, hallway_walls)
+        _put_wall(current_x-1, current_y+1, rooms, wall_locations, floor_locations, hallway_walls)
+    if current_y < end_y and x_step == 1:  # Going right up
+        _put_wall(current_x, current_y-1, rooms, wall_locations, floor_locations, hallway_walls)
+        _put_wall(current_x+1, current_y-1, rooms, wall_locations, floor_locations, hallway_walls)
+    if current_y > end_y and x_step == 1:  # Going right down
+        _put_wall(current_x, current_y+1, rooms, wall_locations, floor_locations, hallway_walls)
+        _put_wall(current_x+1, current_y+1, rooms, wall_locations, floor_locations, hallway_walls)         
+
+    # Vertical
     while current_y != end_y:
         room = is_in_any_room(current_x, current_y, rooms)
         if room:
@@ -209,28 +224,21 @@ def _add_floor_and_targets(x, y, floor_locations: dict[tuple, FloorTile], hallwa
     
     # add floor and link targets
     proposed_location = floor_locations.get((x,y))
-    adjacent_targets = find_surrounding_targets(x, y, floor_locations)
-
     if proposed_location is None: # empty/no floor
         # build floor
         new_floor = FloorTile(x, y, x+1, y+1, target_offset)
         new_target = new_floor.get_target()
          # link room
         if target:
-            new_target.add_target(target)
-            target.add_target(new_target)
-        # link floors
-        for adj_target in adjacent_targets:
-            adj_target.add_target(new_target)
-            new_target.add_target(adj_target)
+            _link_targets(new_target, target)
         # Add new floor
         floor_locations[(x,y)] = new_floor
         hallway_floors.append(new_floor)
     else: # Already a floor here
-        existing_target = proposed_location.get_target()
-        for adj_target in adjacent_targets:
-            adj_target.add_target(existing_target)
-            existing_target.add_target(adj_target)
+        new_target = proposed_location.get_target()
+    # link surrounding targets
+    for adj_target in find_surrounding_targets(x, y, floor_locations):
+        _link_targets(adj_target, new_target)
 
 def _add_hall_walls(rooms, hallway_walls: list, floor_locations: dict, wall_locations: dict, direction, location: tuple):
     """
@@ -239,26 +247,14 @@ def _add_hall_walls(rooms, hallway_walls: list, floor_locations: dict, wall_loca
     x, y = location
     if direction == "horizontal": 
         # top
-        if floor_locations.get((x, y+1)) is None and wall_locations.get((x,y+1)) is None and is_in_any_room(x, y+1, rooms) is None:
-            wall = WallTile(x, y+1, x+1, y+2)
-            wall_locations[(x, y+1)] = wall
-            hallway_walls.append(wall)
+        _put_wall(x, y+1, rooms, wall_locations, floor_locations, hallway_walls)
         # bottom
-        if floor_locations.get((x, y-1)) is None and wall_locations.get((x,y-1)) is None and is_in_any_room(x, y-1, rooms) is None:
-            wall = WallTile(x, y-1, x+1, y)
-            wall_locations[(x, y-1)] = wall
-            hallway_walls.append(wall)
-    else: # vertical
+        _put_wall(x, y-1, rooms, wall_locations, floor_locations, hallway_walls)
+    else:
         # right
-        if floor_locations.get((x+1, y)) is None and wall_locations.get((x+1,y)) is None and is_in_any_room(x+1, y, rooms) is None:
-            wall = WallTile(x+1, y, x+2, y+1)
-            wall_locations[(x+1, y)] = wall
-            hallway_walls.append(wall)
+        _put_wall(x+1, y, rooms, wall_locations, floor_locations, hallway_walls)
         # left
-        if floor_locations.get((x-1, y)) is None and wall_locations.get((x-1,y)) is None and is_in_any_room(x-1, y, rooms) is None:
-            wall = WallTile(x-1, y, x, y+1)
-            wall_locations[(x-1, y)] = wall
-            hallway_walls.append(wall)
+        _put_wall(x-1, y, rooms, wall_locations, floor_locations, hallway_walls)
 
 def find_surrounding_targets(x, y, floor_tiles:dict[tuple, FloorTile]) -> list[Target]:
     targets = []
@@ -273,3 +269,11 @@ def find_surrounding_targets(x, y, floor_tiles:dict[tuple, FloorTile]) -> list[T
                 targets.append(floor.get_target())
     return targets
                 
+def _put_wall(x, y, rooms: list, wall_locations: dict, floor_locations: dict, hallway_walls: list):
+    if floor_locations.get((x, y)) is None and wall_locations.get((x,y)) is None and not is_in_any_room(x,y,rooms):
+        wall = WallTile(x,y,x+1,y+1)
+        wall_locations[x,y] = wall
+        hallway_walls.append(wall)
+def _link_targets(x: Target, y: Target):
+    x.add_target(y)
+    y.add_target(x)
