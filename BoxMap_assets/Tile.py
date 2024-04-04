@@ -25,8 +25,8 @@ class WallTile(Tile):
     """
     It's a wall...
     """
-    def __init__(self, X, Y, neg_X, neg_Y):
-        super().__init__(X, Y, neg_X, neg_Y)
+    def __init__(self, left_X, bottom_Y, right_X, top_Y):
+        super().__init__(left_X, bottom_Y, right_X, top_Y)
         self._tile_type = "wall"
 
 class FloorTile(Tile):

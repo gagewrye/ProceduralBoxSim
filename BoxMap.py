@@ -38,7 +38,8 @@ class BoxMap():
             "floor": 'grey',
             "wall": 'green',
             "target": 'red',
-            "traversed_target": 'green'
+            "traversed_target": 'green',
+            "connection": 'purple'
         }
 
         # Plot floor tiles
@@ -49,7 +50,7 @@ class BoxMap():
             height = top_y - bottom_y
 
             # Corrected to use bottom-left corner for Rectangle
-            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=0.2, edgecolor='black', facecolor=color_map["floor"])
+            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=0.2, edgecolor='none', facecolor=color_map["floor"])
             ax.add_patch(rect)
 
             # Add target
@@ -58,16 +59,22 @@ class BoxMap():
             target_color = "target" if target.get_times_traversed() == 0 else 'traversed_target'
             target_patch = patches.Circle((target_X, target_Y), 0.1, color=color_map[target_color])
             ax.add_patch(target_patch)
+            
+            # Draw connections to other targets
+            for connected_target in target.get_adjacent_targets():
+                x, y = connected_target.get_coordinates()
+                plt.plot([target_X, x], [target_Y, y], color=color_map["connection"], linewidth=0.5)
+
 
         # Plot wall tiles
-        for tile in self.get_walls():  # Assuming get_walls() returns iterable of wall tiles
+        for tile in self.get_walls():
             left_x, bottom_y, right_x, top_y = tile.get_boundaries()
 
             width = right_x - left_x
             height = top_y - bottom_y
 
             # Corrected to use bottom-left corner for Rectangle
-            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=0.2, edgecolor='black', facecolor=color_map["wall"])
+            rect = patches.Rectangle((left_x, bottom_y), width, height, linewidth=1, edgecolor='black', facecolor=color_map["wall"])
             ax.add_patch(rect)
 
         if show:
@@ -104,16 +111,17 @@ def _construct_hallways(planned_hallways: list[tuple], rooms, target_offset) -> 
     hallways = []
     floors = []
     floor_locations: dict[tuple, FloorTile] = {}
+    wall_locations: dict[tuple, WallTile] = {}
     # Build Hallway floors
     for start, end in planned_hallways:
-        hallway = Hallway(start, end, rooms, floor_locations, target_offset)
+        hallway = Hallway(start, end, rooms, floor_locations, wall_locations, target_offset)
         hallways.append(hallway)
         floors.extend(hallway.get_floors())
-    
+        walls.extend(hallway.get_walls())
     # Build hallway walls
     for hallway in hallways:
         hallway.build_walls(hallways, rooms) # TODO: finish function
-        walls.append(hallway.get_walls())
+        # walls.append(hallway.get_walls())
     return floors, walls
 
 def _build(mst: MST, target_offset) -> tuple:
@@ -137,6 +145,6 @@ def _build(mst: MST, target_offset) -> tuple:
         floors.append(room.get_floor())
         walls += room.get_walls()
     floors += hallway_floors
-    # walls += hallway_walls TODO: add back when walls can be built
+    walls += hallway_walls
     
     return floors, walls

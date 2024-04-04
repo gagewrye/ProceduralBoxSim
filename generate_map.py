@@ -1,4 +1,4 @@
-from ue_map_generator import ue_map_generator
+# from ue_map_generator import ue_map_generator
 from argparse import ArgumentParser, Namespace
 from TargetHandler import TargetHandler
 from BoxMap import BoxMap
@@ -13,7 +13,7 @@ def parse_args() -> Namespace:
     arg_parser = ArgumentParser(description="Train command classification networks.")
 
     arg_parser.add_argument("--num_rooms", type=int, default=4, help="Number of rooms on map")
-    arg_parser.add_argument("--room_seed", type=int, default=47, help="Determines what the map looks like")
+    arg_parser.add_argument("--room_seed", type=int, default=4, help="Determines what the map looks like")
     arg_parser.add_argument("--map_size_x", type=int, default=100, help="X-axis size")
     arg_parser.add_argument("--map_size_y", type=int, default=100, help="Y-axis size")
     arg_parser.add_argument("--max_room_size", type=int, default=10, help="How large the rooms can be")
@@ -42,7 +42,7 @@ def main():
     target_handler.add_targets_from_tiles(floors)
     
     # build unreal engine map
-    ue_map = ue_map_generator(map, args.ue_scaling_factor)
+    # ue_map = ue_map_generator(map, args.ue_scaling_factor)
 
     # Create a directory named after the seed
     directory_name = f"./{args.room_seed}"
@@ -59,8 +59,8 @@ def main():
         pickle.dump(map, map_file)
     with open(os.path.join(directory_name, "target_handler.pkl"), 'wb') as target_file:
         pickle.dump(target_handler, target_file)
-    with open(os.path.join(directory_name, "ue_map.pkl"), 'wb') as ue_map_file:
-        pickle.dump(ue_map, ue_map_file)
+    # with open(os.path.join(directory_name, "ue_map.pkl"), 'wb') as ue_map_file:
+        # pickle.dump(ue_map, ue_map_file)
 
 
 if __name__ == '__main__':
