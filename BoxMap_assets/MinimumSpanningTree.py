@@ -72,7 +72,7 @@ def _generate_graph(points: list) -> dict:
 
 
 # Prim's Algorithm to find the MST - chatGPT
-def _prims_algorithm(graph: dict, starting_vertex: tuple) -> dict:
+def _prims_algorithm(graph: dict, starting_vertex: tuple) -> dict[tuple, list[tuple]]:
     mst = {starting_vertex: []}  # Initialize the starting vertex with an empty list
     visited = set([starting_vertex])
     edges = [(cost, starting_vertex, to) for to, cost in graph[starting_vertex]]
